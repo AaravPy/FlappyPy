@@ -17,16 +17,6 @@ body {
   font-family: "Space Grotesk", sans-serif;
 }
 
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.22;
-  background-image: linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
-  background-size: 42px 42px;
-}
-
 .game-shell { width: min(1260px, calc(100% - 64px)); margin: 0 auto; }
 .topbar { height: 90px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); }
 .brand { color: var(--ink); text-decoration: none; font-size: 14px; font-weight: 700; letter-spacing: .14em; display: flex; align-items: center; gap: 10px; }
@@ -74,7 +64,6 @@ button:hover { background: #f0ff8b; }
 .credits { color: var(--muted); border-top: 1px solid var(--line); padding: 18px 0 26px; text-align: center; font: 10px "DM Mono", monospace; letter-spacing: .1em; }
 .credits strong { color: var(--ink); font-weight: 500; }
 body.og-mode { background: #5ec8ed; }
-body.og-mode::before { display: none; }
 body.og-mode .topbar { border-color: rgba(22, 51, 66, .22); }
 body.og-mode .brand, body.og-mode h1, body.og-mode .credits strong { color: #163342; }
 body.og-mode .brand-mark { border-color: #163342; color: #163342; }

@@ -131,14 +131,6 @@ function drawBackground() {
   ctx.beginPath();
   ctx.arc(width - 125, 135, 58, 0, Math.PI * 2);
   ctx.fill();
-  ctx.fillStyle = "rgba(16, 24, 40, .18)";
-  for (let x = -80; x < width + 100; x += 190) {
-    ctx.beginPath();
-    ctx.moveTo(x, height - groundHeight);
-    ctx.lineTo(x + 110, height - groundHeight - 100);
-    ctx.lineTo(x + 260, height - groundHeight);
-    ctx.fill();
-  }
 }
 
 function drawModernCity() {
@@ -174,7 +166,6 @@ function drawModernCity() {
     }
     if (building.sign) drawCompanyBadge(building, top);
   });
-  drawModernLights(skylineBase);
   ctx.fillStyle = "rgba(9, 21, 33, .72)";
   ctx.fillRect(330, skylineBase - 492, 8, 22);
   ctx.fillRect(502, skylineBase - 442, 9, 28);
@@ -203,35 +194,6 @@ function drawModernCity() {
   smog.addColorStop(1, "rgba(119, 137, 126, .42)");
   ctx.fillStyle = smog;
   ctx.fillRect(0, skylineBase - 240, width, 240);
-}
-
-function drawModernLights(skylineBase) {
-  const time = performance.now() / 900;
-  const colors = ["#6ee7cf", "#b98cff", "#ff7188", "#e4ff4f"];
-  ctx.save();
-  ctx.globalCompositeOperation = "screen";
-  for (let index = 0; index < 4; index += 1) {
-    const x = 90 + index * 180 + Math.sin(time + index) * 24;
-    const beam = ctx.createLinearGradient(x, skylineBase - 430, x + 60, skylineBase);
-    beam.addColorStop(0, `${colors[index]}66`);
-    beam.addColorStop(1, `${colors[index]}00`);
-    ctx.fillStyle = beam;
-    ctx.beginPath();
-    ctx.moveTo(x - 10, skylineBase - 430);
-    ctx.lineTo(x + 10, skylineBase - 430);
-    ctx.lineTo(x + 85, skylineBase);
-    ctx.lineTo(x - 50, skylineBase);
-    ctx.closePath();
-    ctx.fill();
-  }
-  ctx.globalCompositeOperation = "source-over";
-  ctx.fillStyle = "#e4ff4f";
-  [90, 270, 450, 630].forEach((x, index) => {
-    const y = skylineBase - 395 - (index % 2) * 55;
-    ctx.fillRect(x - 18, y, 36, 3);
-    ctx.fillRect(x - 9, y + 6, 18, 2);
-  });
-  ctx.restore();
 }
 
 function drawFlyingCars() {
@@ -381,14 +343,6 @@ function drawGround() {
   ctx.fillRect(0, height - groundHeight, width, groundHeight);
   ctx.fillStyle = "#e4ff4f";
   ctx.fillRect(0, height - groundHeight, width, 6);
-  ctx.strokeStyle = "rgba(244, 240, 231, .13)";
-  ctx.lineWidth = 2;
-  for (let x = -42 + groundOffset; x < width; x += 42) {
-    ctx.beginPath();
-    ctx.moveTo(x, height - groundHeight + 6);
-    ctx.lineTo(x - 28, height);
-    ctx.stroke();
-  }
 }
 
 function drawBird() {
