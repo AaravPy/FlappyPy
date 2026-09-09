@@ -9,6 +9,8 @@ const startButton = document.querySelector("#startButton");
 const statusText = document.querySelector("#statusText");
 const flightStatus = document.querySelector("#flightStatus");
 const ogModeButton = document.querySelector("#ogMode");
+const pauseButton = document.querySelector("#pauseButton");
+const achievementCount = document.querySelector("#achievementCount");
 
 const width = canvas.width;
 const height = canvas.height;
@@ -24,8 +26,34 @@ let lastTime = 0;
 let animationFrame;
 let groundOffset = 0;
 let ogMode = false;
+let audioContext;
+const achievementDefinitions = [
+  { id: "first-flight", check: () => state === "playing" },
+  { id: "gap-runner", check: () => score >= 5 },
+  { id: "high-flyer", check: () => score >= 10 },
+  { id: "og-pilot", check: () => ogMode }
+];
+const unlockedAchievements = new Set(JSON.parse(localStorage.getItem("flappypy-achievements") || "[]"));
 
 bestElement.textContent = String(best).padStart(3, "0");
+
+function updateAchievements() {
+  achievementDefinitions.forEach(({ id }) => {
+    const element = document.querySelector(`#achievement-${id}`);
+    const unlocked = unlockedAchievements.has(id);
+    element.classList.toggle("unlocked", unlocked);
+    element.querySelector("b").textContent = unlocked ? "UNLOCKED" : "LOCKED";
+  });
+  achievementCount.textContent = `${unlockedAchievements.size} / ${achievementDefinitions.length}`;
+}
+
+function checkAchievements() {
+  achievementDefinitions.forEach(({ id, check }) => {
+    if (check()) unlockedAchievements.add(id);
+  });
+  localStorage.setItem("flappypy-achievements", JSON.stringify([...unlockedAchievements]));
+  updateAchievements();
+}
 
 function resetGame() {
   bird.y = height / 2;
@@ -54,14 +82,52 @@ function updateScore() {
 function begin() {
   resetGame();
   state = "playing";
+  pauseButton.disabled = false;
+  pauseButton.textContent = "PAUSE";
+  checkAchievements();
   overlay.classList.add("hidden");
   statusText.textContent = "IN FLIGHT";
   flightStatus.textContent = "LIVE / 01";
-  flap();
+}
+
+function playTone(startFrequency, endFrequency, duration, type = "sine", volume = 0.06) {
+  audioContext ||= new AudioContext();
+  if (audioContext.state === "suspended") audioContext.resume();
+  const oscillator = audioContext.createOscillator();
+  const gain = audioContext.createGain();
+  const now = audioContext.currentTime;
+  oscillator.type = type;
+  oscillator.frequency.setValueAtTime(startFrequency, now);
+  oscillator.frequency.exponentialRampToValueAtTime(endFrequency, now + duration);
+  gain.gain.setValueAtTime(volume, now);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+  oscillator.connect(gain);
+  gain.connect(audioContext.destination);
+  oscillator.start(now);
+  oscillator.stop(now + duration);
+}
+
+function playFlapSound() {
+  playTone(520, 760, 0.09, "triangle", 0.045);
+}
+
+function playPointSound() {
+  playTone(740, 1100, 0.12, "sine", 0.05);
+}
+
+function playCollisionSound() {
+  playTone(150, 65, 0.18, "sawtooth", 0.07);
+}
+
+function playGameOverSound() {
+  playTone(240, 80, 0.4, "triangle", 0.06);
 }
 
 function endGame() {
   state = "gameover";
+  pauseButton.disabled = true;
+  playCollisionSound();
+  playGameOverSound();
   best = Math.max(best, score);
   localStorage.setItem("flappypy-best", best);
   updateScore();
@@ -75,8 +141,26 @@ function endGame() {
 
 function flap() {
   if (state === "ready" || state === "gameover") begin();
+  if (state === "paused") return;
   if (state !== "playing") return;
   bird.velocity = settings.flap;
+  playFlapSound();
+}
+
+function togglePause() {
+  if (state === "playing") {
+    state = "paused";
+    pauseButton.textContent = "RESUME";
+    statusText.textContent = "PAUSED";
+    flightStatus.textContent = "HOLDING";
+    return;
+  }
+  if (state === "paused") {
+    state = "playing";
+    pauseButton.textContent = "PAUSE";
+    statusText.textContent = "IN FLIGHT";
+    flightStatus.textContent = "LIVE / 01";
+  }
 }
 
 function addPipe() {
@@ -114,6 +198,8 @@ function update(delta) {
       pipe.counted = true;
       score += 1;
       applyDifficulty();
+      playPointSound();
+      checkAchievements();
       if (score > best) best = score;
       updateScore();
     }
@@ -382,6 +468,7 @@ function drawBird() {
 
 function setOgMode(enabled) {
   ogMode = enabled;
+  checkAchievements();
   document.body.classList.toggle("og-mode", ogMode);
   ogModeButton.setAttribute("aria-pressed", String(ogMode));
   ogModeButton.textContent = ogMode ? "MODERN MODE" : "OG MODE";
@@ -409,6 +496,7 @@ function frame(timestamp) {
 }
 
 startButton.addEventListener("click", flap);
+pauseButton.addEventListener("click", togglePause);
 ogModeButton.addEventListener("click", toggleOgMode);
 canvas.addEventListener("pointerdown", flap);
 document.addEventListener("keydown", (event) => {
@@ -419,6 +507,7 @@ document.addEventListener("keydown", (event) => {
 });
 
 resetGame();
+updateAchievements();
 setOgMode(false);
 draw();
 animationFrame = requestAnimationFrame(frame);

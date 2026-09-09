@@ -17,6 +17,7 @@
           <span>FLAPPY.PY</span>
         </a>
         <div class="header-actions">
+          <button class="pause-toggle" id="pauseButton" type="button" disabled>PAUSE</button>
           <button class="mode-toggle" id="ogMode" type="button" aria-pressed="false">OG MODE</button>
           <div class="status-pill"><span class="status-dot"></span><span id="statusText">READY TO FLY</span></div>
         </div>
@@ -28,6 +29,15 @@
           <h1>Stay light.<br /><em>Fly far.</em></h1>
           <p class="intro">Thread the gaps, chase the high score, and keep your little bird airborne.</p>
           <div class="key-hint"><span class="keycap">SPACE</span><span>or tap to flap</span></div>
+          <section class="achievement-panel" aria-label="Achievements">
+            <div class="achievement-heading"><span>FLIGHT LOG</span><strong id="achievementCount">0 / 4</strong></div>
+            <ul class="achievement-list">
+              <li id="achievement-first-flight"><span><strong>FIRST FLIGHT</strong><small>Take off once</small></span><b>LOCKED</b></li>
+              <li id="achievement-gap-runner"><span><strong>GAP RUNNER</strong><small>Pass 5 pipes</small></span><b>LOCKED</b></li>
+              <li id="achievement-high-flyer"><span><strong>HIGH FLYER</strong><small>Pass 10 pipes</small></span><b>LOCKED</b></li>
+              <li id="achievement-og-pilot"><span><strong>OG PILOT</strong><small>Try OG mode</small></span><b>LOCKED</b></li>
+            </ul>
+          </section>
         </div>
 
         <div class="stage-wrap">
