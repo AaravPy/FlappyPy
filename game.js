@@ -15,6 +15,7 @@ const height = canvas.height;
 const groundHeight = 78;
 const bird = { x: 180, y: height / 2, radius: 18, velocity: 0, rotation: 0 };
 const settings = { gravity: 0.43, flap: -8.2, speed: 3.4, gap: 220, pipeWidth: 76 };
+const baseSettings = { gravity: 0.43, speed: 3.4, gap: 220 };
 let pipes = [];
 let score = 0;
 let best = Number(localStorage.getItem("flappypy-best") || 0);
@@ -30,9 +31,19 @@ function resetGame() {
   bird.y = height / 2;
   bird.velocity = 0;
   bird.rotation = 0;
-  pipes = [{ x: width + 120, gapY: 355 }];
+  settings.gravity = baseSettings.gravity;
+  settings.speed = baseSettings.speed;
+  settings.gap = baseSettings.gap;
+  pipes = [{ x: width + 120, gapY: 355, gap: settings.gap }];
   score = 0;
   updateScore();
+}
+
+function applyDifficulty() {
+  const level = Math.min(score, 30);
+  settings.speed = baseSettings.speed + level * 0.1;
+  settings.gap = baseSettings.gap - level * 2;
+  settings.gravity = baseSettings.gravity + level * 0.004;
 }
 
 function updateScore() {
@@ -74,6 +85,7 @@ function addPipe() {
   pipes.push({
     x: width + settings.pipeWidth,
     gapY,
+    gap: settings.gap,
     counted: false
   });
 }
@@ -84,7 +96,7 @@ function hitsPipe(pipe) {
   const birdTop = bird.y - bird.radius + 4;
   const birdBottom = bird.y + bird.radius - 4;
   const inX = birdRight > pipe.x && birdLeft < pipe.x + settings.pipeWidth;
-  const inGap = birdTop > pipe.gapY - settings.gap / 2 && birdBottom < pipe.gapY + settings.gap / 2;
+  const inGap = birdTop > pipe.gapY - pipe.gap / 2 && birdBottom < pipe.gapY + pipe.gap / 2;
   return inX && !inGap;
 }
 
@@ -101,6 +113,7 @@ function update(delta) {
     if (!pipe.counted && pipe.x + settings.pipeWidth < bird.x) {
       pipe.counted = true;
       score += 1;
+      applyDifficulty();
       if (score > best) best = score;
       updateScore();
     }
@@ -298,8 +311,8 @@ function drawAppleMark(x, y) {
 }
 
 function drawPipe(pipe) {
-  const top = pipe.gapY - settings.gap / 2;
-  const bottom = pipe.gapY + settings.gap / 2;
+  const top = pipe.gapY - pipe.gap / 2;
+  const bottom = pipe.gapY + pipe.gap / 2;
   if (ogMode) {
     ctx.fillStyle = "#45ad4d";
     ctx.fillRect(pipe.x, 0, settings.pipeWidth, top);
