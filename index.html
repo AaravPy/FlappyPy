@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#101828" />
+    <title>FlappyPy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="game-shell">
+      <header class="topbar">
+        <a class="brand" href="./" aria-label="FlappyPy home">
+          <span>FLAPPY.PY</span>
+        </a>
+        <div class="header-actions">
+          <button class="mode-toggle" id="ogMode" type="button" aria-pressed="false">OG MODE</button>
+          <div class="status-pill"><span class="status-dot"></span><span id="statusText">READY TO FLY</span></div>
+        </div>
+      </header>
+
+      <section class="game-layout" aria-label="FlappyPy game">
+        <div class="game-copy">
+          <p class="eyebrow">ARCADE / 001</p>
+          <h1>Stay light.<br /><em>Fly far.</em></h1>
+          <p class="intro">Thread the gaps, chase the high score, and keep your little bird airborne.</p>
+          <div class="key-hint"><span class="keycap">SPACE</span><span>or tap to flap</span></div>
+        </div>
+
+        <div class="stage-wrap">
+          <div class="scoreboard" aria-live="polite">
+            <div><span class="score-label">SCORE</span><strong id="score">000</strong></div>
+            <div><span class="score-label">BEST</span><strong id="best">000</strong></div>
+          </div>
+          <div class="stage-frame">
+            <canvas id="game" width="720" height="900" aria-label="FlappyPy game canvas"></canvas>
+            <div class="overlay" id="overlay">
+              <div class="overlay-card">
+                <span class="overlay-kicker" id="overlayKicker">WELCOME, BIRDY</span>
+                <h2 id="overlayTitle">Ready when<br />you are.</h2>
+                <button id="startButton" type="button"><span>START FLIGHT</span><span aria-hidden="true">&#8594;</span></button>
+                <p>Press space, click, or tap to rise.</p>
+              </div>
+            </div>
+          </div>
+          <div class="stage-footer"><span>FLAPPY.PY // NIGHT FLIGHT</span><span id="flightStatus">STANDBY</span></div>
+        </div>
+      </section>
+      <footer class="credits">A GAME BY <strong>PANIPURI</strong></footer>
+    </main>
+    <script src="game.js"></script>
+  </body>
+</html>
