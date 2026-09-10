@@ -31,7 +31,7 @@ const achievementDefinitions = [
   { id: "first-flight", check: () => state === "playing" },
   { id: "gap-runner", check: () => score >= 5 },
   { id: "high-flyer", check: () => score >= 10 },
-  { id: "og-pilot", check: () => ogMode }
+  { id: "og-pilot", check: () => ogMode && state === "playing" }
 ];
 const unlockedAchievements = new Set(JSON.parse(localStorage.getItem("flappypy-achievements") || "[]"));
 
@@ -80,6 +80,7 @@ function updateScore() {
 }
 
 function begin() {
+  ensureAudioContext();
   resetGame();
   state = "playing";
   pauseButton.disabled = false;
@@ -90,9 +91,13 @@ function begin() {
   flightStatus.textContent = "LIVE / 01";
 }
 
-function playTone(startFrequency, endFrequency, duration, type = "sine", volume = 0.06) {
+function ensureAudioContext() {
   audioContext ||= new AudioContext();
   if (audioContext.state === "suspended") audioContext.resume();
+}
+
+function playTone(startFrequency, endFrequency, duration, type = "sine", volume = 0.06) {
+  ensureAudioContext();
   const oscillator = audioContext.createOscillator();
   const gain = audioContext.createGain();
   const now = audioContext.currentTime;
@@ -185,6 +190,7 @@ function hitsPipe(pipe) {
 }
 
 function update(delta) {
+  if (state !== "playing") return;
   const step = Math.min(delta / 16.67, 2);
   bird.velocity += settings.gravity * step;
   bird.y += bird.velocity * step;
@@ -204,7 +210,10 @@ function update(delta) {
       updateScore();
     }
   });
-  if (bird.y - bird.radius < 0 || bird.y + bird.radius > height - groundHeight || pipes.some(hitsPipe)) endGame();
+  if (bird.y - bird.radius < 0 || bird.y + bird.radius > height - groundHeight || pipes.some(hitsPipe)) {
+    checkAchievements();
+    endGame();
+  }
 }
 
 function drawBackground() {
