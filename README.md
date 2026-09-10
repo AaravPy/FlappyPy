@@ -1,66 +1,89 @@
-# FlappyPy
+# 🐦 FlappyPy
 
-> A fast, futuristic Flappy Bird-style browser game built with HTML, CSS, and JavaScript.
+> A modern, browser-based Flappy Bird-style game built with vanilla JavaScript.
 
-[![CI](https://github.com/AaravPy/FlappyPy/actions/workflows/ci.yml/badge.svg)](https://github.com/AaravPy/FlappyPy/actions/workflows/ci.yml)
-[![Live demo](https://img.shields.io/badge/play-live%20demo-e4ff4f?style=flat&labelColor=101828)](https://AaravPy.github.io/FlappyPy/)
-[![Version](https://img.shields.io/badge/version-0.3.0-6ee7cf?style=flat&labelColor=101828)](VERSION)
+**Fly. Dodge. Score. Repeat.**
 
-## Play
+[![Version](https://img.shields.io/badge/version-v0.3.0-e4ff4f?style=flat-square)](https://github.com/AaravPy/FlappyPy/releases)
+[![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-yellow?style=flat-square&logo=javascript)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+[![HTML5](https://img.shields.io/badge/HTML5-Canvas-orange?style=flat-square&logo=html5)](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API)
+[![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
 
-**[Open the live demo](https://AaravPy.github.io/FlappyPy/)**
+---
 
-Or run it locally:
+## 🎮 About
+
+**FlappyPy** is a fast-paced Flappy Bird-style browser game with a futuristic twist.
+
+It started as a simple flying game and evolved into a feature-rich project featuring dynamic difficulty, achievements, power-ups, customization, weather effects, audio, statistics, and more.
+
+No frameworks. No game engine.
+
+Just **HTML, CSS, JavaScript, and Canvas.**
+
+---
+
+## ✨ Features
+
+### 🕹️ Gameplay
+- 🐦 Flappy Bird-style physics
+- 🚧 Procedurally generated pipes
+- 📈 Dynamic difficulty
+- 🔥 Combo scoring
+- 💨 Near-miss bonuses
+- ⚡ Power-ups
+- 🛡️ Shield
+- 🐌 Slow-motion
+- ✖️ Score multiplier
+- 🏆 High-score tracking
+
+### 🏅 Progression
+- 🏆 Achievement system
+- 📊 Statistics
+- 🎯 Multiple achievement challenges
+- 💾 Persistent progress using `localStorage`
+- 🎉 Game-over celebrations
+
+### 🎨 Customization
+- 🐦 Multiple bird skins
+- 🌆 Different backgrounds
+- 🌙 Day/night environments
+- 🌧️ Weather effects
+- 🌫️ Fog effects
+- 🕵️ Hidden easter eggs
+
+### 🔊 Audio
+- 🎵 Background music
+- 🔊 Sound effects
+- 🏆 Achievement sounds
+- 🎚️ Audio settings
+- 🌐 Browser-safe audio initialization
+
+### 🖥️ UI & UX
+- Futuristic interface
+- Responsive design
+- Pause/resume
+- Countdown before flights
+- Tutorial
+- Settings
+- Mobile-friendly interface
+- Reduced-motion support
+
+---
+
+## 🚀 Play
+
+### 🌐 Live Demo
+
+**Play FlappyPy in your browser:**
+
+https://aaravpy.github.io/FlappyPy/
+
+---
+
+## 🛠️ Run Locally
+
+Clone the repository:
 
 ```bash
 git clone https://github.com/AaravPy/FlappyPy.git
-cd FlappyPy
-python3 -m http.server 8000
-```
-
-Open <http://localhost:8000> in a browser.
-
-## Highlights
-
-- Responsive canvas gameplay with mouse, touch, and keyboard controls.
-- Countdown start sequence, increasing difficulty, pipe patterns, combos, and near-miss bonuses.
-- Shield, slow-motion, and score-multiplier power-ups.
-- Achievements with persistent progress and unlock notifications.
-- Practice mode, bird skins, multiple backgrounds, day/night cycle, rain, and fog.
-- Browser-safe Web Audio with background music, mute, separate SFX/music volume, and unlock chimes.
-- Game-over screen with final score, best score, restart action, and new-best celebration.
-
-## Controls
-
-| Action | Control |
-| --- | --- |
-| Flap | `Space`, `ArrowUp`, click, or tap the game frame |
-| Pause/resume | `P` or the pause button |
-| Restart | Click/tap `RESTART FLIGHT` or press `Space` after game over |
-| Secret | Type `FLAPPY` for the hidden bird skin |
-
-## Media
-
-![Desktop preview](docs/media/desktop-preview.svg)
-
-![Mobile preview](docs/media/mobile-preview.svg)
-
-[Animated vector gameplay preview](docs/media/gameplay-preview.svg)
-
-The repository includes lightweight preview artwork in [`docs/media`](docs/media/README.md). For authentic screenshots and a gameplay GIF, capture the live demo at desktop and mobile widths and place the files in that directory using the names documented there.
-
-## Development
-
-This is a dependency-free static site. Edit `index.html`, `style.css`, or `game.js`, then refresh the browser. The CI workflow checks JavaScript syntax, required entry files, and broken local references.
-
-## Contributing
-
-Read [`CONTRIBUTING.md`](CONTRIBUTING.md) before opening an issue or pull request. Bug reports, accessibility improvements, gameplay balancing, and small visual refinements are welcome.
-
-## License
-
-No license has been selected for this repository yet. Do not redistribute the project until a license is added.
-
-## Version
-
-Current release: **0.3.0**. See [`CHANGELOG.md`](CHANGELOG.md) for release notes.
