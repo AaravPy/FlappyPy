@@ -415,7 +415,10 @@ function endGame() {
   playGameOverSound();
   const isNewBest = score > bestAtStart;
   best = Math.max(best, score);
-  localStorage.setItem("flappypy-best", best);
+  try {
+    localStorage.setItem("flappypy-best", best);
+  } catch {
+  }
   updateScore();
   overlayKicker.textContent = score > 0 ? "FLIGHT LOGGED" : "THE SKY IS WIDE";
   overlayTitle.textContent = score > 0 ? "Flight complete." : "A little too low.";
@@ -463,12 +466,16 @@ function togglePause() {
 
 function addPipe() {
   const margin = 130;
+  const halfGap = physicsSettings.gap / 2;
+  const minGapY = margin + halfGap;
+  const maxGapY = canvasHeight - groundHeight - margin - halfGap;
+  const clampGapY = (value) => Math.min(maxGapY, Math.max(minGapY, value));
   const pattern = PIPE_PATTERNS[pipePatternIndex++ % PIPE_PATTERNS.length];
   const previousGap = pipes.length ? pipes[pipes.length - 1].gapY : canvasHeight / 2;
-  let gapY = margin + Math.random() * (canvasHeight - groundHeight - margin * 2);
-  if (pattern === "high") gapY = 250 + Math.random() * 70;
-  if (pattern === "low") gapY = 540 + Math.random() * 70;
-  if (pattern === "zigzag") gapY = previousGap < canvasHeight / 2 ? 570 : 260;
+  let gapY = minGapY + Math.random() * (maxGapY - minGapY);
+  if (pattern === "high") gapY = clampGapY(250 + Math.random() * 70);
+  if (pattern === "low") gapY = clampGapY(540 + Math.random() * 70);
+  if (pattern === "zigzag") gapY = clampGapY(previousGap < canvasHeight / 2 ? 570 : 260);
   pipes.push({
     x: canvasWidth + physicsSettings.pipeWidth,
     gapY,
