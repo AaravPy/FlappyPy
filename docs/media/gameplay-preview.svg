@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 440" role="img" aria-labelledby="title desc">
+  <title id="title">FlappyPy animated preview</title>
+  <desc id="desc">An animated vector preview of the FlappyPy bird flying between pipes.</desc>
+  <rect width="720" height="440" fill="#152b3d"/>
+  <path d="M0 330h720" stroke="#e4ff4f" stroke-width="28"/>
+  <path d="M155 0v125h72V0M155 300v140h72V300M510 0v180h72V0M510 350v90h72v-90" fill="#e4ff4f"/>
+  <g>
+    <circle cy="220" r="18" fill="#f4f0e7">
+      <animate attributeName="cx" values="80;620;80" dur="5s" repeatCount="indefinite"/>
+      <animate attributeName="cy" values="220;180;220" dur="5s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+  <text x="28" y="42" fill="#e4ff4f" font-family="monospace" font-size="16">GAMEPLAY PREVIEW</text>
+</svg>

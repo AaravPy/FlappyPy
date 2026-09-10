@@ -1,0 +1,40 @@
+name: Bug report
+description: Report a reproducible problem in the game.
+title: "bug: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve FlappyPy.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Describe the incorrect behavior and what you expected instead.
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and version
+      placeholder: Chrome 140, Safari 18, Firefox 142
+    validations:
+      required: true
+  - type: input
+    id: viewport
+    attributes:
+      label: Device or viewport
+      placeholder: iPhone 15, 390x844, desktop 1440x900
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: List the smallest reliable sequence of actions.
+    validations:
+      required: true
+  - type: textarea
+    id: media
+    attributes:
+      label: Screenshots or recording
+      description: Drag images or a short GIF here when the issue is visual.

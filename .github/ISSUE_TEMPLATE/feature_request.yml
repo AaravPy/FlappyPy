@@ -1,0 +1,19 @@
+name: Feature request
+description: Suggest an improvement for FlappyPy.
+title: "feature: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would you like to add?
+      description: Describe the feature and the player problem it solves.
+    validations:
+      required: true
+  - type: textarea
+    id: approach
+    attributes:
+      label: Proposed behavior
+      description: Explain how the feature should work in the game.
+    validations:
+      required: true

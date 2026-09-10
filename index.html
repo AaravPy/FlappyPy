@@ -19,9 +19,25 @@
         <div class="header-actions">
           <button class="pause-toggle" id="pauseButton" type="button" disabled>PAUSE</button>
           <button class="mode-toggle" id="ogMode" type="button" aria-pressed="false">OG MODE</button>
+          <button class="settings-toggle" id="settingsButton" type="button" aria-expanded="false" aria-controls="settingsPanel">SETTINGS</button>
           <div class="status-pill"><span class="status-dot"></span><span id="statusText">READY TO FLY</span></div>
         </div>
       </header>
+      <aside class="settings-panel" id="settingsPanel" aria-label="Game settings" hidden>
+        <div class="settings-heading"><span>GAME SETTINGS</span><button class="settings-close" id="settingsClose" type="button" aria-label="Close settings">CLOSE</button></div>
+        <label class="setting-row"><span><strong>SOUND EFFECTS</strong><small>Flaps, points, and collisions</small></span><input id="soundSetting" type="checkbox" /></label>
+        <label class="setting-row"><span><strong>MUSIC</strong><small>Ambient flight loop</small></span><input id="musicSetting" type="checkbox" /></label>
+        <label class="setting-row"><span><strong>MUTE ALL AUDIO</strong><small>Silence music and sound effects</small></span><input id="muteSetting" type="checkbox" /></label>
+        <label class="setting-row range-row"><span><strong>SFX VOLUME</strong><output id="sfxVolumeValue">70%</output></span><input id="sfxVolumeSetting" type="range" min="0" max="1" step="0.05" /></label>
+        <label class="setting-row range-row"><span><strong>MUSIC VOLUME</strong><output id="musicVolumeValue">35%</output></span><input id="musicVolumeSetting" type="range" min="0" max="1" step="0.05" /></label>
+        <label class="setting-row"><span><strong>DIFFICULTY</strong><small>Applies on the next flight</small></span><select id="difficultySetting"><option value="easy">EASY</option><option value="normal">NORMAL</option><option value="hard">HARD</option></select></label>
+        <label class="setting-row"><span><strong>PRACTICE MODE</strong><small>Gentler physics for learning</small></span><input id="practiceSetting" type="checkbox" /></label>
+        <label class="setting-row"><span><strong>TUTORIAL MODE</strong><small>Show flight guidance</small></span><input id="tutorialSetting" type="checkbox" /></label>
+        <label class="setting-row"><span><strong>BIRD SKIN</strong><small>Choose your flight look</small></span><select id="skinSetting"><option value="classic">CLASSIC</option><option value="sunset">SUNSET</option><option value="mint">MINT</option></select></label>
+        <label class="setting-row"><span><strong>BACKGROUND</strong><small>Choose your world</small></span><select id="backgroundSetting"><option value="city">CITY</option><option value="ocean">OCEAN</option><option value="desert">DESERT</option></select></label>
+        <label class="setting-row"><span><strong>WEATHER</strong><small>Set the atmosphere</small></span><select id="weatherSetting"><option value="clear">CLEAR</option><option value="rain">RAIN</option><option value="fog">FOG</option></select></label>
+        <label class="setting-row"><span><strong>REDUCED MOTION</strong><small>Limit decorative animations</small></span><input id="motionSetting" type="checkbox" /></label>
+      </aside>
 
       <section class="game-layout" aria-label="FlappyPy game">
         <div class="game-copy">
@@ -30,12 +46,14 @@
           <p class="intro">Thread the gaps, chase the high score, and keep your little bird airborne.</p>
           <div class="key-hint"><span class="keycap">SPACE</span><span>or tap to flap</span></div>
           <section class="achievement-panel" aria-label="Achievements">
-            <div class="achievement-heading"><span>FLIGHT LOG</span><strong id="achievementCount">0 / 4</strong></div>
+            <div class="achievement-heading"><span>FLIGHT LOG</span><strong id="achievementCount">0 / 6</strong></div>
             <ul class="achievement-list">
               <li id="achievement-first-flight"><span><strong>FIRST FLIGHT</strong><small>Take off once</small></span><b>LOCKED</b></li>
               <li id="achievement-gap-runner"><span><strong>GAP RUNNER</strong><small>Pass 5 pipes</small></span><b>LOCKED</b></li>
               <li id="achievement-high-flyer"><span><strong>HIGH FLYER</strong><small>Pass 10 pipes</small></span><b>LOCKED</b></li>
-              <li id="achievement-og-pilot"><span><strong>OG PILOT</strong><small>Try OG mode</small></span><b>LOCKED</b></li>
+              <li id="achievement-og-pilot"><span><strong>OG PILOT</strong><small>Fly in OG mode</small></span><b>LOCKED</b></li>
+              <li id="achievement-night-shift"><span><strong>NIGHT SHIFT</strong><small>Pass 15 pipes</small></span><b>LOCKED</b></li>
+              <li id="achievement-skyline-legend"><span><strong>SKYLINE LEGEND</strong><small>Pass 25 pipes</small></span><b>LOCKED</b></li>
             </ul>
           </section>
         </div>
@@ -51,14 +69,25 @@
               <div class="overlay-card">
                 <span class="overlay-kicker" id="overlayKicker">WELCOME, BIRDY</span>
                 <h2 id="overlayTitle">Ready when<br />you are.</h2>
+                <div class="game-over-stats" id="gameOverStats" hidden>
+                  <div><span>SCORE</span><strong id="finalScore">000</strong></div>
+                  <div><span>BEST</span><strong id="finalBest">000</strong></div>
+                  <b id="newBestIndicator" hidden>NEW BEST!</b>
+                </div>
+                <div class="best-celebration" id="bestCelebration" hidden>NEW BEST!<small>THE SKYLINE IS YOURS</small></div>
+                <p class="game-over-achievement" id="gameOverAchievement" aria-live="polite" hidden></p>
                 <button id="startButton" type="button"><span>START FLIGHT</span><span aria-hidden="true">&#8594;</span></button>
                 <p>Press space, click, or tap to rise.</p>
               </div>
             </div>
           </div>
           <div class="stage-footer"><span>FLAPPY.PY // NIGHT FLIGHT</span><span id="flightStatus">STANDBY</span></div>
+          <div class="flight-metrics"><span id="comboIndicator">COMBO x0</span><span id="nearMissIndicator">NEAR 0</span><span id="powerUpIndicator">POWER --</span><span id="speedIndicator">SPEED 1.0x</span></div>
         </div>
       </section>
+      <div class="countdown" id="countdown" role="status" aria-live="assertive" hidden>3</div>
+      <div class="tutorial-hint" id="tutorialHint" role="status" aria-live="polite" hidden><strong>FLIGHT SCHOOL</strong><span>Tap or press SPACE to flap.<br />Thread the gaps and collect power-ups.</span></div>
+      <div class="achievement-toast" id="achievementToast" role="status" aria-live="polite"><span>ACHIEVEMENT UNLOCKED</span><strong></strong></div>
       <footer class="credits">A GAME BY <strong>PANIPURI</strong></footer>
     </main>
     <script src="game.js"></script>
