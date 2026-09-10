@@ -2,18 +2,18 @@
 
 > A fast, futuristic Flappy Bird-style browser game built with HTML, CSS, and JavaScript.
 
-[![CI](https://github.com/boundryguy/FlappyPy/actions/workflows/ci.yml/badge.svg)](https://github.com/boundryguy/FlappyPy/actions/workflows/ci.yml)
-[![Live demo](https://img.shields.io/badge/play-live%20demo-e4ff4f?style=flat&labelColor=101828)](https://boundryguy.github.io/FlappyPy/)
+[![CI](https://github.com/AaravPy/FlappyPy/actions/workflows/ci.yml/badge.svg)](https://github.com/AaravPy/FlappyPy/actions/workflows/ci.yml)
+[![Live demo](https://img.shields.io/badge/play-live%20demo-e4ff4f?style=flat&labelColor=101828)](https://AaravPy.github.io/FlappyPy/)
 [![Version](https://img.shields.io/badge/version-0.3.0-6ee7cf?style=flat&labelColor=101828)](VERSION)
 
 ## Play
 
-**[Open the live demo](https://boundryguy.github.io/FlappyPy/)**
+**[Open the live demo](https://AaravPy.github.io/FlappyPy/)**
 
 Or run it locally:
 
 ```bash
-git clone https://github.com/boundryguy/FlappyPy.git
+git clone https://github.com/AaravPy/FlappyPy.git
 cd FlappyPy
 python3 -m http.server 8000
 ```
