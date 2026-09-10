@@ -15,6 +15,7 @@ body {
   background: #0d1522;
   color: var(--ink);
   font-family: "Space Grotesk", sans-serif;
+  overscroll-behavior-y: none;
 }
 
 .game-shell { width: min(1260px, calc(100% - 64px)); margin: 0 auto; }
@@ -32,13 +33,28 @@ body {
 .mode-toggle:hover { border-color: var(--accent); color: var(--accent); background: transparent; transform: translateY(-2px) rotate(-2deg); box-shadow: 0 0 0 3px rgba(228, 255, 79, .08), 0 7px 20px rgba(228, 255, 79, .18); animation: funky-pulse .8s ease-in-out infinite alternate; }
 .mode-toggle:hover::after { opacity: .45; transform: rotate(18deg) translateX(190px); }
 .mode-toggle[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); background: transparent; }
+.settings-toggle { width: auto; padding: 8px 10px; border: 1px solid var(--line); background: transparent; color: var(--muted); font-size: 10px; }
+.settings-toggle:hover, .settings-close:hover { border-color: var(--accent); color: var(--accent); background: transparent; }
+.settings-panel { position: absolute; z-index: 8; top: 76px; right: max(32px, calc((100vw - 1260px) / 2)); width: min(330px, calc(100% - 32px)); padding: 18px; border: 1px solid var(--line); background: rgba(16, 24, 40, .96); box-shadow: 0 18px 50px rgba(0,0,0,.3); }
+.settings-heading { display: flex; justify-content: space-between; align-items: center; color: var(--accent); font: 10px "DM Mono", monospace; letter-spacing: .1em; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+.settings-close { width: auto; padding: 4px 0; border: 0; background: transparent; color: var(--muted); font-size: 9px; }
+.setting-row { display: flex; justify-content: space-between; align-items: center; gap: 18px; padding: 14px 0; border-bottom: 1px solid rgba(244, 240, 231, .08); cursor: pointer; }
+.setting-row:last-child { border-bottom: 0; padding-bottom: 2px; }
+.setting-row span { display: grid; gap: 4px; }
+.setting-row strong { color: var(--ink); font: 10px "DM Mono", monospace; letter-spacing: .06em; }
+.setting-row small { color: var(--muted); font: 9px "DM Mono", monospace; }
+.setting-row input { width: 16px; height: 16px; accent-color: var(--accent); }
+.setting-row input[type="range"] { width: 110px; height: 4px; }
+.setting-row output { color: var(--accent); font: 9px "DM Mono", monospace; }
+.setting-row select { border: 1px solid var(--line); padding: 7px 8px; background: var(--panel); color: var(--ink); font: 9px "DM Mono", monospace; }
 @keyframes funky-pulse {
   from { box-shadow: 0 0 0 3px rgba(228, 255, 79, .08), 0 7px 20px rgba(228, 255, 79, .18); }
   to { box-shadow: 0 0 0 6px rgba(228, 255, 79, .02), 0 10px 26px rgba(228, 255, 79, .34); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .mode-toggle, .mode-toggle::after { transition: none; animation: none; }
+  .mode-toggle, .mode-toggle::after, .achievement-toast, .overlay { transition: none; animation: none; }
 }
+.reduced-motion *, .reduced-motion *::before, .reduced-motion *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
 .game-layout { display: grid; grid-template-columns: minmax(250px, .78fr) minmax(360px, 1fr); gap: clamp(48px, 9vw, 150px); align-items: center; min-height: calc(100vh - 90px); padding: 48px 0; }
 .game-copy { align-self: center; padding-bottom: 80px; }
 .eyebrow, .score-label, .stage-footer, .overlay-kicker { font: 11px "DM Mono", monospace; letter-spacing: .11em; }
@@ -57,24 +73,50 @@ h1 em { color: var(--accent); font-style: normal; }
 .achievement-list li strong { font-size: 10px; font-weight: 500; letter-spacing: .06em; }
 .achievement-list li small, .achievement-list li b { font-size: 9px; font-weight: 400; letter-spacing: .04em; }
 .achievement-list li b { color: rgba(165, 166, 170, .5); }
-.achievement-list li.unlocked { color: var(--ink); }
-.achievement-list li.unlocked b { color: var(--accent); }
+.achievement-list > li.unlocked { color: var(--ink); }
+.achievement-list > li.unlocked b { color: var(--accent); }
+.achievement-toast { position: fixed; z-index: 10; top: 24px; left: 50%; width: min(320px, calc(100% - 32px)); padding: 14px 18px; border: 1px solid var(--accent); background: rgba(16, 24, 40, .94); box-shadow: 0 14px 40px rgba(0,0,0,.28); opacity: 0; pointer-events: none; transform: translate(-50%, -18px); transition: opacity .25s, transform .25s; }
+.achievement-toast.visible { opacity: 1; transform: translate(-50%, 0); }
+.achievement-toast span, .achievement-toast strong { display: block; font: 10px "DM Mono", monospace; letter-spacing: .1em; }
+.achievement-toast span { color: var(--accent); margin-bottom: 6px; }
+.achievement-toast strong { color: var(--ink); font-weight: 500; }
+@media (prefers-reduced-motion: reduce) {
+  .achievement-toast, .best-celebration { transition: none; animation: none; }
+}
 .stage-wrap { width: min(100%, 540px); justify-self: center; }
 .scoreboard { display: flex; justify-content: space-between; padding: 0 10px 18px; }
 .scoreboard div { display: flex; align-items: baseline; gap: 10px; }
 .score-label { color: var(--muted); }
 .scoreboard strong { color: var(--accent); font: 500 26px "DM Mono", monospace; letter-spacing: .04em; }
-.stage-frame { position: relative; overflow: hidden; border: 1px solid var(--line); background: var(--night); box-shadow: 0 30px 80px rgba(0,0,0,.24); aspect-ratio: 4 / 5; }
-canvas { display: block; width: 100%; height: 100%; }
+.stage-frame { position: relative; overflow: hidden; border: 1px solid var(--line); background: var(--night); box-shadow: 0 30px 80px rgba(0,0,0,.24); aspect-ratio: 4 / 5; touch-action: none; }
+canvas { display: block; width: 100%; height: 100%; touch-action: none; user-select: none; }
 .overlay { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; background: rgba(10, 18, 30, .44); transition: opacity .25s; }
 .overlay.hidden { opacity: 0; pointer-events: none; }
-.overlay-card { width: min(100%, 310px); padding: 31px; border: 1px solid rgba(244,240,231,.22); background: rgba(16, 24, 40, .85); backdrop-filter: blur(8px); }
+.overlay-card { width: min(100%, 310px); max-height: calc(100% - 32px); overflow-y: auto; padding: 31px; border: 1px solid rgba(244,240,231,.22); background: rgba(16, 24, 40, .85); backdrop-filter: blur(8px); }
 .overlay-kicker { color: var(--accent); }
 .overlay h2 { font-size: 34px; line-height: .98; letter-spacing: -.05em; margin: 16px 0 28px; }
+.game-over-stats { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: -8px 0 18px; }
+.game-over-stats div { display: grid; gap: 5px; padding: 10px; border: 1px solid rgba(244,240,231,.12); }
+.game-over-stats span { color: var(--muted); font: 9px "DM Mono", monospace; letter-spacing: .1em; }
+.game-over-stats strong { color: var(--accent); font: 500 22px "DM Mono", monospace; }
+.game-over-stats > b { grid-column: 1 / -1; color: var(--accent); font: 10px "DM Mono", monospace; letter-spacing: .1em; }
+.game-over-achievement { color: var(--accent); font: 9px "DM Mono", monospace; line-height: 1.5; margin: -4px 0 18px; }
+.best-celebration { color: var(--accent); margin: -12px 0 18px; font: 700 16px "Space Grotesk", sans-serif; letter-spacing: .08em; animation: best-burst .7s ease-out both; }
+.best-celebration small { display: block; margin-top: 4px; color: var(--muted); font: 9px "DM Mono", monospace; letter-spacing: .1em; }
+@keyframes best-burst {
+  from { opacity: 0; transform: scale(.8) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
 button { width: 100%; border: 0; padding: 15px 16px; display: flex; justify-content: space-between; align-items: center; background: var(--accent); color: #172000; cursor: pointer; font: 600 12px "DM Mono", monospace; letter-spacing: .06em; }
 button:hover { background: #f0ff8b; }
 .overlay-card p { color: var(--muted); font: 11px "DM Mono", monospace; margin: 18px 0 0; }
 .stage-footer { color: var(--muted); display: flex; justify-content: space-between; padding: 13px 1px 0; font-size: 9px; }
+.flight-metrics { display: flex; justify-content: space-between; gap: 10px; padding-top: 8px; color: var(--accent); font: 9px "DM Mono", monospace; letter-spacing: .08em; }
+.countdown { position: fixed; z-index: 12; top: 50%; left: 50%; color: var(--accent); font: 700 clamp(54px, 12vw, 108px)/1 "Space Grotesk", sans-serif; text-shadow: 0 0 28px rgba(228,255,79,.45); transform: translate(-50%, -50%); pointer-events: none; }
+.tutorial-hint { position: fixed; z-index: 11; left: 50%; bottom: 8vh; width: min(330px, calc(100% - 32px)); padding: 14px 18px; border: 1px solid var(--accent); background: rgba(16,24,40,.94); color: var(--ink); transform: translateX(-50%); box-shadow: 0 14px 40px rgba(0,0,0,.25); }
+.tutorial-hint strong, .tutorial-hint span { display: block; }
+.tutorial-hint strong { color: var(--accent); font: 10px "DM Mono", monospace; letter-spacing: .1em; margin-bottom: 6px; }
+.tutorial-hint span { color: var(--muted); font: 11px/1.5 "DM Mono", monospace; }
 .credits { color: var(--muted); border-top: 1px solid var(--line); padding: 18px 0 26px; text-align: center; font: 10px "DM Mono", monospace; letter-spacing: .1em; }
 .credits strong { color: var(--ink); font-weight: 500; }
 body.og-mode { background: #5ec8ed; }
@@ -95,4 +137,21 @@ body.og-mode .status-dot { background: #2f8d3e; box-shadow: 0 0 12px rgba(47, 14
   .intro { margin: 20px 0; }
   .achievement-panel { margin-top: 28px; }
   .stage-wrap { width: 100%; }
+  .stage-frame { width: min(100%, 80svh); margin-inline: auto; }
+  .header-actions { gap: 8px; }
+  .status-pill { display: none; }
+  .settings-panel { top: 62px; right: 16px; }
+}
+@media (max-width: 420px) {
+  .game-shell { width: min(100% - 20px, 540px); }
+  .game-layout { gap: 26px; padding-top: 28px; }
+  .topbar { align-items: flex-start; padding-top: 18px; }
+  .header-actions { flex-wrap: wrap; justify-content: flex-end; }
+  .overlay { padding: 16px; }
+  .overlay-card { padding: 22px; }
+  .overlay h2 { font-size: 28px; margin: 12px 0 20px; }
+  .game-over-stats { margin-bottom: 14px; }
+  .game-over-stats strong { font-size: 18px; }
+  .flight-metrics { font-size: 8px; gap: 5px; }
+  .tutorial-hint { bottom: 4vh; }
 }

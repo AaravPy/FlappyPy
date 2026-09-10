@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 680" role="img" aria-labelledby="title desc">
+  <title id="title">FlappyPy desktop preview</title>
+  <desc id="desc">A stylized preview of the FlappyPy game interface.</desc>
+  <rect width="1200" height="680" fill="#0d1522"/>
+  <rect x="48" y="38" width="1104" height="604" fill="#101828" stroke="#38465a"/>
+  <text x="82" y="88" fill="#f4f0e7" font-family="monospace" font-size="20" font-weight="700">FLAPPY.PY</text>
+  <text x="82" y="185" fill="#e4ff4f" font-family="sans-serif" font-size="54" font-weight="700">Stay light.</text>
+  <text x="82" y="240" fill="#f4f0e7" font-family="sans-serif" font-size="54" font-weight="700">Fly far.</text>
+  <rect x="650" y="100" width="410" height="510" fill="#20384a" stroke="#536678"/>
+  <circle cx="845" cy="280" r="18" fill="#f4f0e7"/>
+  <path d="M650 410h410M650 500h410" stroke="#e4ff4f" stroke-width="34"/>
+  <circle cx="845" cy="280" r="28" fill="none" stroke="#6ee7cf" stroke-width="3"/>
+  <text x="82" y="550" fill="#a5a6aa" font-family="monospace" font-size="14">COUNTDOWN // COMBO // ACHIEVEMENTS</text>
+</svg>
