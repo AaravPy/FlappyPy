@@ -93,11 +93,11 @@ let secretBuffer = "";
 let easterEggActive = false;
 const achievementDefinitions = [
   { id: "first-flight", title: "FIRST FLIGHT", check: () => state === "playing" },
-  { id: "gap-runner", title: "GAP RUNNER", check: () => score >= 5 },
-  { id: "high-flyer", title: "HIGH FLYER", check: () => score >= 10 },
+  { id: "gap-runner", title: "GAP RUNNER", check: () => pipesPassed >= 5 },
+  { id: "high-flyer", title: "HIGH FLYER", check: () => pipesPassed >= 10 },
   { id: "og-pilot", title: "OG PILOT", check: () => ogMode && state === "playing" },
-  { id: "night-shift", title: "NIGHT SHIFT", check: () => score >= 15 },
-  { id: "skyline-legend", title: "SKYLINE LEGEND", check: () => score >= 25 }
+  { id: "night-shift", title: "NIGHT SHIFT", check: () => pipesPassed >= 15 },
+  { id: "skyline-legend", title: "SKYLINE LEGEND", check: () => pipesPassed >= 25 }
 ];
 const achievementIds = new Set(achievementDefinitions.map(({ id }) => id));
 const unlockedAchievements = loadUnlockedAchievements();
