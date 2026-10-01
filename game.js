@@ -55,6 +55,31 @@ const DIFFICULTY_PROFILES = {
 };
 const PIPE_PATTERNS = ["standard", "high", "low", "zigzag"];
 const POWER_UP_TYPES = ["shield", "slow", "multiplier"];
+const POWER_UP_APPEARANCE = {
+  shield: { color: "#6ee7cf", symbol: "S" },
+  slow: { color: "#b98cff", symbol: "~" },
+  multiplier: { color: "#ffcf5c", symbol: "2X" }
+};
+const CITY_BUILDINGS = [
+  { x: 0, width: 94, height: 270 },
+  { x: 82, width: 128, height: 390, sign: "AMAZON" },
+  { x: 196, width: 84, height: 225 },
+  { x: 268, width: 145, height: 470, sign: "APPLE" },
+  { x: 397, width: 98, height: 315 },
+  { x: 478, width: 152, height: 420, sign: "GOOGLE" },
+  { x: 615, width: 118, height: 255 }
+];
+const FLYING_CARS = [
+  { speed: 42, y: 286, scale: .8, color: "#6ee7cf", offset: 40 },
+  { speed: 29, y: 438, scale: 1, color: "#ff7188", offset: 310 },
+  { speed: 54, y: 560, scale: .62, color: "#b98cff", offset: 520 }
+];
+const COMPANY_BADGES = {
+  APPLE: { color: "#d7a9ff" },
+  AMAZON: { mark: "a", color: "#ffae5b" },
+  MICROSOFT: { mark: "M", color: "#6ee7cf" },
+  GOOGLE: { mark: "G", color: "#ff7188" }
+};
 const BIRD_SKINS = {
   classic: { body: "#f4f0e7", wing: "#e4ff4f", eye: "#162337", beak: "#e4ff4f" },
   sunset: { body: "#ff9b71", wing: "#ffdd72", eye: "#38203a", beak: "#ff7188" },
@@ -62,12 +87,13 @@ const BIRD_SKINS = {
 };
 const COUNTDOWN_STEP_MS = 800;
 const MAX_SPEED_LEVEL = 12;
+const SHIELD_GRACE_MS = 700;
 const userSettings = loadUserSettings();
 const physicsSettings = { ...DIFFICULTY_PROFILES[userSettings.difficulty], flap: -8.2, pipeWidth: 76 };
 let pipes = [];
 let powerUps = [];
 let score = 0;
-let best = Number(localStorage.getItem("flappypy-best") || 0);
+let best = loadBestScore();
 let bestAtStart = best;
 let state = "ready";
 let lastTime = 0;
@@ -86,6 +112,7 @@ let countdownTimer;
 let tutorialTimer;
 let worldTime = 0;
 let shieldActive = false;
+let shieldGraceTimer = 0;
 let slowTimer = 0;
 let multiplierTimer = 0;
 let pipesPassed = 0;
@@ -105,30 +132,63 @@ const notificationQueue = [];
 let notificationActive = false;
 
 // Settings and persistence
-function loadUserSettings() {
-  const defaults = { sound: true, music: false, mute: false, sfxVolume: 0.7, musicVolume: 0.35, difficulty: "normal", practice: false, tutorial: false, skin: "classic", background: "city", weather: "clear", reducedMotion: false };
+function readStoredValue(key, fallback = null) {
   try {
-    const stored = JSON.parse(localStorage.getItem("flappypy-settings") || "{}");
-    return {
-      ...defaults,
-      ...stored,
-      difficulty: DIFFICULTY_PROFILES[stored.difficulty] ? stored.difficulty : defaults.difficulty,
-      skin: ["classic", "sunset", "mint"].includes(stored.skin) ? stored.skin : defaults.skin,
-      background: ["city", "ocean", "desert"].includes(stored.background) ? stored.background : defaults.background,
-      weather: ["clear", "rain", "fog"].includes(stored.weather) ? stored.weather : defaults.weather,
-      sfxVolume: Number.isFinite(Number(stored.sfxVolume)) ? Math.min(1, Math.max(0, Number(stored.sfxVolume))) : defaults.sfxVolume,
-      musicVolume: Number.isFinite(Number(stored.musicVolume)) ? Math.min(1, Math.max(0, Number(stored.musicVolume))) : defaults.musicVolume
-    };
+    return localStorage.getItem(key) ?? fallback;
   } catch {
-    return defaults;
+    return fallback;
   }
 }
 
-function saveUserSettings() {
+function writeStoredValue(key, value) {
   try {
-    localStorage.setItem("flappypy-settings", JSON.stringify(userSettings));
+    localStorage.setItem(key, value);
   } catch {
   }
+}
+
+function loadBestScore() {
+  const storedBest = Number(readStoredValue("flappypy-best", "0"));
+  return Number.isFinite(storedBest) ? Math.max(0, Math.floor(storedBest)) : 0;
+}
+
+function persistBestScore() {
+  writeStoredValue("flappypy-best", String(best));
+}
+
+function loadUserSettings() {
+  const defaults = { sound: true, music: false, mute: false, sfxVolume: 0.7, musicVolume: 0.35, difficulty: "normal", practice: false, tutorial: false, skin: "classic", background: "city", weather: "clear", reducedMotion: window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches ?? false };
+  let stored;
+  try {
+    stored = JSON.parse(readStoredValue("flappypy-settings", "{}") || "{}");
+  } catch {
+    return defaults;
+  }
+  if (!stored || typeof stored !== "object" || Array.isArray(stored)) return defaults;
+  const readBoolean = (key) => typeof stored[key] === "boolean" ? stored[key] : defaults[key];
+  const readVolume = (key) => {
+    const value = stored[key];
+    const numeric = typeof value === "number" || (typeof value === "string" && value.trim()) ? Number(value) : NaN;
+    return Number.isFinite(numeric) ? Math.min(1, Math.max(0, numeric)) : defaults[key];
+  };
+  return {
+    sound: readBoolean("sound"),
+    music: readBoolean("music"),
+    mute: readBoolean("mute"),
+    sfxVolume: readVolume("sfxVolume"),
+    musicVolume: readVolume("musicVolume"),
+    difficulty: DIFFICULTY_PROFILES[stored.difficulty] ? stored.difficulty : defaults.difficulty,
+    practice: readBoolean("practice"),
+    tutorial: readBoolean("tutorial"),
+    skin: ["classic", "sunset", "mint"].includes(stored.skin) ? stored.skin : defaults.skin,
+    background: ["city", "ocean", "desert"].includes(stored.background) ? stored.background : defaults.background,
+    weather: ["clear", "rain", "fog"].includes(stored.weather) ? stored.weather : defaults.weather,
+    reducedMotion: readBoolean("reducedMotion")
+  };
+}
+
+function saveUserSettings() {
+  writeStoredValue("flappypy-settings", JSON.stringify(userSettings));
 }
 
 function applyUserSettings() {
@@ -153,8 +213,8 @@ function applyUserSettings() {
 
 function loadUnlockedAchievements() {
   try {
-    const stored = JSON.parse(localStorage.getItem("flappypy-achievements") || "[]");
-    return new Set(Array.isArray(stored) ? stored.filter((id) => achievementIds.has(id)) : []);
+    const stored = JSON.parse(readStoredValue("flappypy-achievements", "[]") || "[]");
+    return new Set(Array.isArray(stored) ? stored.filter((id) => typeof id === "string" && achievementIds.has(id)) : []);
   } catch {
     return new Set();
   }
@@ -174,18 +234,17 @@ function updateAchievements() {
 }
 
 function checkAchievements() {
+  let changed = false;
   achievementDefinitions.forEach((achievement) => {
     if (achievement.check() && !unlockedAchievements.has(achievement.id)) {
       unlockedAchievements.add(achievement.id);
+      changed = true;
       notificationQueue.push(achievement);
       runAchievementTitles.push(achievement.title);
       playAchievementSound();
     }
   });
-  try {
-    localStorage.setItem("flappypy-achievements", JSON.stringify([...unlockedAchievements]));
-  } catch {
-  }
+  if (changed) writeStoredValue("flappypy-achievements", JSON.stringify([...unlockedAchievements]));
   updateAchievements();
   showNextAchievementNotification();
 }
@@ -233,6 +292,7 @@ function resetGame() {
   pipePatternIndex = 0;
   pipesPassed = 0;
   shieldActive = false;
+  shieldGraceTimer = 0;
   slowTimer = 0;
   multiplierTimer = 0;
   worldTime = 0;
@@ -264,6 +324,11 @@ function updateScore() {
   bestElement.textContent = String(best).padStart(3, "0");
 }
 
+function setOverlayVisibility(visible) {
+  overlay.classList.toggle("hidden", !visible);
+  overlay.setAttribute("aria-hidden", String(!visible));
+}
+
 function begin() {
   if (state === "countdown") return;
   if (userSettings.sound || userSettings.music) ensureAudioContext();
@@ -280,7 +345,7 @@ function begin() {
   state = "countdown";
   pauseButton.disabled = true;
   pauseButton.textContent = "PAUSE";
-  overlay.classList.add("hidden");
+  setOverlayVisibility(false);
   statusText.textContent = "GET READY";
   flightStatus.textContent = "COUNTDOWN";
   startCountdown();
@@ -317,7 +382,8 @@ function startFlight() {
     tutorialTimer = window.setTimeout(() => { tutorialHint.hidden = true; }, 9000);
   }
   statusText.textContent = "IN FLIGHT";
-  flightStatus.textContent = "LIVE / 01";
+  flightStatus.textContent = ogMode ? "OG / 01" : "LIVE / 01";
+  canvas.focus();
 }
 
 // Audio
@@ -415,10 +481,7 @@ function endGame() {
   playGameOverSound();
   const isNewBest = score > bestAtStart;
   best = Math.max(best, score);
-  try {
-    localStorage.setItem("flappypy-best", best);
-  } catch {
-  }
+  persistBestScore();
   updateScore();
   overlayKicker.textContent = score > 0 ? "FLIGHT LOGGED" : "THE SKY IS WIDE";
   overlayTitle.textContent = score > 0 ? "Flight complete." : "A little too low.";
@@ -433,9 +496,10 @@ function endGame() {
     ? `ACHIEVEMENT: ${runAchievementTitles.join(" / ")}`
     : "";
   startButton.querySelector("span").textContent = "RESTART FLIGHT";
-  overlay.classList.remove("hidden");
+  setOverlayVisibility(true);
   statusText.textContent = "FLIGHT ENDED";
   flightStatus.textContent = "LANDED";
+  startButton.focus();
 }
 
 function flap() {
@@ -453,6 +517,13 @@ function togglePause() {
     pauseButton.textContent = "RESUME";
     statusText.textContent = "PAUSED";
     flightStatus.textContent = "HOLDING";
+    overlayKicker.textContent = "FLIGHT ON HOLD";
+    overlayTitle.textContent = "Take a breath.";
+    gameOverStats.hidden = true;
+    gameOverAchievement.hidden = true;
+    startButton.querySelector("span").textContent = "RESUME FLIGHT";
+    setOverlayVisibility(true);
+    startButton.focus();
     return;
   }
   if (state === "paused") {
@@ -460,7 +531,10 @@ function togglePause() {
     startMusic();
     pauseButton.textContent = "PAUSE";
     statusText.textContent = "IN FLIGHT";
-    flightStatus.textContent = "LIVE / 01";
+    flightStatus.textContent = ogMode ? "OG / 01" : "LIVE / 01";
+    startButton.querySelector("span").textContent = "RESTART FLIGHT";
+    setOverlayVisibility(false);
+    canvas.focus();
   }
 }
 
@@ -529,10 +603,13 @@ function awardPipeScore(pipe) {
   }
   applyDifficulty();
   playPointSound();
-  checkAchievements();
   pipesPassed += 1;
+  checkAchievements();
   if (pipesPassed % 3 === 0) spawnPowerUp(pipe);
-  if (score > best) best = score;
+  if (score > best) {
+    best = score;
+    persistBestScore();
+  }
   updateScore();
   updateGameplayMetrics();
 }
@@ -552,13 +629,14 @@ function updateGame(delta) {
   const step = Math.min(delta / 16.67, 2);
   const timeScale = slowTimer > 0 ? 0.55 : 1;
   const scaledStep = step * timeScale;
-  worldTime += delta * timeScale;
+  if (!userSettings.reducedMotion) worldTime += delta * timeScale;
   bird.velocity += physicsSettings.gravity * scaledStep;
   bird.y += bird.velocity * scaledStep;
   bird.rotation = Math.min(Math.PI / 2, bird.velocity / 10);
   groundOffset = (groundOffset + physicsSettings.speed * scaledStep) % 42;
   pipes.forEach((pipe) => { pipe.x -= physicsSettings.speed * scaledStep; });
   updatePowerUps(step, timeScale);
+  if (shieldGraceTimer > 0) shieldGraceTimer = Math.max(0, shieldGraceTimer - delta);
   if (pipes.length && pipes[0].x < -physicsSettings.pipeWidth - 20) pipes.shift();
   if (pipes.length && pipes[pipes.length - 1].x < canvasWidth - 330) addPipe();
   pipes.forEach((pipe) => {
@@ -570,9 +648,11 @@ function updateGame(delta) {
   const collisionDetected = bird.y - bird.radius < 0 || bird.y + bird.radius > canvasHeight - groundHeight || pipes.some(hitsPipe);
   if (collisionDetected && shieldActive) {
     shieldActive = false;
+    shieldGraceTimer = SHIELD_GRACE_MS;
+    bird.y = Math.min(canvasHeight - groundHeight - bird.radius, Math.max(bird.radius, bird.y));
     bird.velocity = physicsSettings.flap * 0.5;
     updateGameplayMetrics();
-  } else if (collisionDetected) {
+  } else if (collisionDetected && shieldGraceTimer <= 0) {
     checkAchievements();
     endGame();
   }
@@ -661,17 +741,8 @@ function drawWeather() {
 }
 
 function drawModernCity() {
-  const buildings = [
-    { x: 0, width: 94, height: 270 },
-    { x: 82, width: 128, height: 390, sign: "AMAZON" },
-    { x: 196, width: 84, height: 225 },
-    { x: 268, width: 145, height: 470, sign: "APPLE" },
-    { x: 397, width: 98, height: 315 },
-    { x: 478, width: 152, height: 420, sign: "GOOGLE" },
-    { x: 615, width: 118, height: 255 }
-  ];
   const skylineBase = canvasHeight - groundHeight - 8;
-  buildings.forEach((building, buildingIndex) => {
+  CITY_BUILDINGS.forEach((building, buildingIndex) => {
     const top = skylineBase - building.height;
     ctx.fillStyle = buildingIndex % 2 ? "rgba(12, 27, 43, .7)" : "rgba(18, 39, 55, .78)";
     ctx.fillRect(building.x, top, building.width, building.height);
@@ -725,12 +796,7 @@ function drawModernCity() {
 
 function drawFlyingCars() {
   const time = userSettings.reducedMotion ? 0 : performance.now() / 1000;
-  const cars = [
-    { speed: 42, y: 286, scale: .8, color: "#6ee7cf", offset: 40 },
-    { speed: 29, y: 438, scale: 1, color: "#ff7188", offset: 310 },
-    { speed: 54, y: 560, scale: .62, color: "#b98cff", offset: 520 }
-  ];
-  cars.forEach((car) => {
+  FLYING_CARS.forEach((car) => {
     const cycle = canvasWidth + 180;
     const x = ((time * car.speed + car.offset) % cycle) - 120;
     drawFlyingCar(x, car.y + Math.sin(time * 1.4 + car.offset) * 7, car.scale, car.color);
@@ -778,13 +844,7 @@ function drawFlyingCar(x, y, scale, color) {
 }
 
 function drawCompanyBadge(building, top) {
-  const badges = {
-    APPLE: { color: "#d7a9ff" },
-    AMAZON: { mark: "a", color: "#ffae5b" },
-    MICROSOFT: { mark: "M", color: "#6ee7cf" },
-    GOOGLE: { mark: "G", color: "#ff7188" }
-  };
-  const badge = badges[building.sign];
+  const badge = COMPANY_BADGES[building.sign];
   const badgeX = building.x + 8;
   const badgeY = top + 10;
   const badgeWidth = building.width - 16;
@@ -892,7 +952,7 @@ function drawBird() {
   ctx.fillStyle = ogMode ? "#e69d25" : skin.beak;
   ctx.beginPath();
   ctx.moveTo(16, -1); ctx.lineTo(31, 4); ctx.lineTo(16, 8); ctx.closePath(); ctx.fill();
-  if (shieldActive) {
+  if (shieldActive || shieldGraceTimer > 0) {
     ctx.strokeStyle = "rgba(110, 231, 207, .85)";
     ctx.lineWidth = 3;
     ctx.beginPath();
@@ -903,15 +963,14 @@ function drawBird() {
 }
 
 function drawPowerUp(powerUp) {
-  const colors = { shield: "#6ee7cf", slow: "#b98cff", multiplier: "#ffcf5c" };
-  const symbols = { shield: "S", slow: "~", multiplier: "2X" };
+  const appearance = POWER_UP_APPEARANCE[powerUp.type];
   ctx.save();
   ctx.translate(powerUp.x, powerUp.y);
-  ctx.fillStyle = `${colors[powerUp.type]}35`;
+  ctx.fillStyle = `${appearance.color}35`;
   ctx.beginPath();
   ctx.arc(0, 0, powerUp.radius + 7, 0, Math.PI * 2);
   ctx.fill();
-  ctx.fillStyle = colors[powerUp.type];
+  ctx.fillStyle = appearance.color;
   ctx.beginPath();
   ctx.arc(0, 0, powerUp.radius, 0, Math.PI * 2);
   ctx.fill();
@@ -919,7 +978,7 @@ function drawPowerUp(powerUp) {
   ctx.font = "700 11px 'DM Mono', monospace";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText(symbols[powerUp.type], 0, 1);
+  ctx.fillText(appearance.symbol, 0, 1);
   ctx.restore();
 }
 
@@ -929,7 +988,7 @@ function setOgMode(enabled) {
   document.body.classList.toggle("og-mode", ogMode);
   ogModeButton.setAttribute("aria-pressed", String(ogMode));
   ogModeButton.textContent = ogMode ? "MODERN MODE" : "OG MODE";
-  flightStatus.textContent = ogMode ? "OG / 01" : "STANDBY";
+  flightStatus.textContent = state === "playing" ? (ogMode ? "OG / 01" : "LIVE / 01") : state === "paused" ? "HOLDING" : state === "countdown" ? "COUNTDOWN" : state === "gameover" ? "LANDED" : "STANDBY";
   renderGame();
 }
 
@@ -941,6 +1000,13 @@ function toggleSettings() {
   const isOpen = !settingsPanel.hidden;
   settingsPanel.hidden = isOpen;
   settingsButton.setAttribute("aria-expanded", String(!isOpen));
+  if (isOpen) settingsButton.focus();
+  else soundSetting.focus();
+}
+
+function handleStartButton() {
+  if (state === "paused") togglePause();
+  else flap();
 }
 
 function handleCanvasPointerDown(event) {
@@ -965,7 +1031,7 @@ function frame(timestamp) {
   animationFrame = requestAnimationFrame(frame);
 }
 
-startButton.addEventListener("click", flap);
+startButton.addEventListener("click", handleStartButton);
 pauseButton.addEventListener("click", togglePause);
 ogModeButton.addEventListener("click", toggleOgMode);
 settingsButton.addEventListener("click", toggleSettings);
@@ -1034,7 +1100,8 @@ weatherSetting.addEventListener("change", () => {
 canvas.addEventListener("pointerdown", handleCanvasPointerDown, { passive: false });
 canvas.addEventListener("contextmenu", (event) => event.preventDefault());
 document.addEventListener("keydown", (event) => {
-  if (event.key.length === 1 && /[a-z]/i.test(event.key)) {
+  const isInteractiveTarget = event.target?.closest?.("input, select, textarea, button, a, [contenteditable='true']");
+  if (!isInteractiveTarget && !event.repeat && event.key.length === 1 && /[a-z]/i.test(event.key)) {
     secretBuffer = `${secretBuffer}${event.key.toLowerCase()}`.slice(-6);
     if (secretBuffer === "flappy") {
       easterEggActive = true;
@@ -1045,6 +1112,11 @@ document.addEventListener("keydown", (event) => {
       renderGame();
     }
   }
+  if (event.key === "Escape" && !settingsPanel.hidden) {
+    toggleSettings();
+    return;
+  }
+  if (isInteractiveTarget || event.repeat) return;
   if (event.code === "Space" || event.code === "ArrowUp") {
     event.preventDefault();
     flap();
